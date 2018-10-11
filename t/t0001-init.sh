@@ -395,7 +395,7 @@ test_expect_success SYMLINKS 're-init to move gitdir symlink' '
 # Tests for the hidden file attribute on windows
 is_hidden () {
 	# Use the output of `attrib`, ignore the absolute path
-	case "$(attrib "$1")" in *H*?:*) return 0;; esac
+	case "$("$SYSTEMROOT"/system32/attrib "$1")" in *H*?:*) return 0;; esac
 	return 1
 }
 
@@ -468,7 +468,8 @@ test_expect_success MINGW 'redirect std handles' '
 		GIT_REDIRECT_STDERR="2>&1" \
 		git rev-parse --git-dir --verify refs/invalid &&
 	printf ".git\nfatal: Needed a single revision\n" >expect &&
-	test_cmp expect output.txt
+	sort <output.txt >output.sorted &&
+	test_cmp expect output.sorted
 '
 
 test_done
