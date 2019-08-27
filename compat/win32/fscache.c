@@ -405,7 +405,7 @@ static struct fsentry *fscache_get(struct fscache *cache, struct fsentry *key)
 			fse = fsentry_alloc(cache, key->list->list,
 					    key->list->name, key->list->len);
 			fse->st_mode = 0;
-			hashmap_add(&cache->map, fse);
+			hashmap_add(&cache->map, &fse->ent);
 		}
 		return NULL;
 	}
