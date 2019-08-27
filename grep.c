@@ -19,7 +19,6 @@ static struct grep_opt grep_defaults;
 #ifdef USE_LIBPCRE2
 static pcre2_general_context *pcre2_global_context;
 
-#ifdef USE_NED_ALLOCATOR
 static void *pcre2_malloc(PCRE2_SIZE size, MAYBE_UNUSED void *memory_data)
 {
 	return malloc(size);
@@ -29,7 +28,6 @@ static void pcre2_free(void *pointer, MAYBE_UNUSED void *memory_data)
 {
 	return free(pointer);
 }
-#endif
 #endif
 
 static const char *color_grep_slots[] = {
@@ -175,6 +173,12 @@ void grep_init(struct grep_opt *opt, struct repository *repo, const char *prefix
 {
 	struct grep_opt *def = &grep_defaults;
 	int i;
+
+#if defined(USE_LIBPCRE2)
+	if (!pcre2_global_context)
+		pcre2_global_context = pcre2_general_context_create(
+					pcre2_malloc, pcre2_free, NULL);
+#endif
 
 #ifdef USE_NED_ALLOCATOR
 #ifdef USE_LIBPCRE1
@@ -343,11 +347,6 @@ void append_header_grep_pattern(struct grep_opt *opt,
 void append_grep_pattern(struct grep_opt *opt, const char *pat,
 			 const char *origin, int no, enum grep_pat_token t)
 {
-#if defined(USE_LIBPCRE2) && defined(USE_NED_ALLOCATOR)
-	if (!pcre2_global_context && opt->ignore_case && has_non_ascii(pat))
-		pcre2_global_context = pcre2_general_context_create(
-					pcre2_malloc, pcre2_free, NULL);
-#endif
 	append_grep_pat(opt, pat, strlen(pat), origin, no, t);
 }
 
